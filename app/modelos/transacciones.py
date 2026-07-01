@@ -5,6 +5,7 @@ class TransaccionBase(SQLModel):
     cantidad: int
     vr_unitario: float
     descripcion: str
+    precio_total: float = Field(default=0)
 
 
 class TransaccionCrear(SQLModel):

@@ -4,23 +4,22 @@ from app.modelos.clientes import Cliente
 from ..conexion_bd import Sesion_dependencia
 from sqlmodel import select
 
+
 router = APIRouter(
     prefix="/facturas",
     tags=["Facturas"]
 )
 
 
-
-# ===================================
-# CRUD FACTURAS
-# ===================================
 @router.get("/", response_model=list[Factura])
 async def listar_facturas(mi_sesion: Sesion_dependencia):
 
     facturas = mi_sesion.exec(select(Factura)).all()
+
     return facturas
 
-@router.get("/{id}")
+
+@router.get("/{id}", response_model=Factura)
 async def obtener_factura(
     id: int,
     mi_sesion: Sesion_dependencia
@@ -36,7 +35,8 @@ async def obtener_factura(
 
     return factura
 
-@router.post("/{cliente_id}")
+
+@router.post("/{cliente_id}", response_model=Factura)
 async def crear_factura(
     cliente_id: int,
     datos_factura: CrearFactura,
@@ -51,17 +51,21 @@ async def crear_factura(
             detail="Cliente no encontrado"
         )
 
-    factura_val = Factura.model_validate(datos_factura.model_dump())
-    factura_val.cliente_id = cliente_id
+    datos = datos_factura.model_dump()
 
-    mi_sesion.add(factura_val)
+    # Se agrega solamente una vez el cliente_id
+    datos["cliente_id"] = cliente_id
+
+    factura = Factura.model_validate(datos)
+
+    mi_sesion.add(factura)
     mi_sesion.commit()
-    mi_sesion.refresh(factura_val)
+    mi_sesion.refresh(factura)
 
-    return factura_val
+    return factura
 
 
-@router.put("/{id}")
+@router.put("/{id}", response_model=Factura)
 async def editar_factura(
     id: int,
     datos_factura: EditarFactura,
@@ -86,32 +90,8 @@ async def editar_factura(
 
     return factura
 
-@router.put("/{id}")
-async def editar_factura(
-    id: int,
-    datos_factura: EditarFactura,
-    mi_sesion: Sesion_dependencia
-):
 
-    factura = mi_sesion.get(Factura, id)
-
-    if not factura:
-        raise HTTPException(
-            status_code=404,
-            detail="Factura no encontrada"
-        )
-
-    datos = datos_factura.model_dump(exclude_unset=True)
-
-    factura.sqlmodel_update(datos)
-
-    mi_sesion.add(factura)
-    mi_sesion.commit()
-    mi_sesion.refresh(factura)
-
-    return factura
-
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=Factura)
 async def eliminar_factura(
     id: int,
     mi_sesion: Sesion_dependencia

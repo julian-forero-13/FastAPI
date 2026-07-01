@@ -9,11 +9,6 @@ router = APIRouter(
         tags=["Clientes"]
 )
 
-# ===================================
-# CRUD CLIENTES
-# ===================================
-
-
 @router.get("/", response_model=list[Cliente])
 async def listar_cliente(sesion: Sesion_dependencia):
     list_cli = sesion.exec(select(Cliente)).all()

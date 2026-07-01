@@ -1,11 +1,9 @@
 from datetime import datetime
 from sqlmodel import SQLModel, Field
 
-from app.modelos.clientes import Cliente
-from app.modelos.transacciones import Transaccion
-
 
 class FacturaBase(SQLModel):
+    cliente_id: int = Field(foreign_key="cliente.id")
     fecha: datetime
 
 
@@ -19,5 +17,3 @@ class EditarFactura(SQLModel):
 
 class Factura(FacturaBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    Cliente_id: int | None = None
-    

@@ -10,10 +10,6 @@ router = APIRouter(
     tags=["Transacciones"]
 )
 
-# ===================================
-# CRUD TRANSACCIONES
-# ===================================
-
 @router.get("/")
 async def listar_transacciones(mi_sesion: Sesion_dependencia):
 
@@ -25,7 +21,7 @@ async def obtener_transaccion(
     id: int,
     mi_sesion: Sesion_dependencia
 ):
-
+    
     transaccion = mi_sesion.get(Transaccion, id)
 
     if not transaccion:
@@ -57,12 +53,14 @@ async def crear_transaccion(
     )
 
     transaccion.factura_id = factura_id
+    transaccion.precio_total = transaccion.cantidad * transaccion.vr_unitario
 
     mi_sesion.add(transaccion)
     mi_sesion.commit()
     mi_sesion.refresh(transaccion)
 
     return transaccion
+
 @router.put("/{id}")
 async def editar_transaccion(
     id: int,
